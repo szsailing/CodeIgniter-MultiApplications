@@ -393,19 +393,26 @@ if ( ! is_php('5.4'))
  *  Furthermore, none of the methods in the app controller
  *  or the loader class can be called via the URI, nor can
  *  controller methods that begin with an underscore.
+ *  add multi-applicatinos support via $_SERVER['HTTP_HOST'] by Jack Wu 
  */
 
 	$e404 = FALSE;
 	$class = ucfirst($RTR->class);
 	$method = $RTR->method;
-
-	if (empty($class) OR ! file_exists(APPPATH.'controllers/'.$RTR->directory.$class.'.php'))
+	
+	$file = APPPATH.'controllers/'.$RTR->directory.$class.'.php';
+	if(is_dir(APPPATH.'controllers/'.$_SERVER['HTTP_HOST']."/"))
+	{
+		$file = APPPATH.'controllers/'.$_SERVER['HTTP_HOST']."/".$RTR->directory.$class.'.php';
+	}
+	
+	if (empty($class) OR ! file_exists($file))
 	{
 		$e404 = TRUE;
 	}
 	else
 	{
-		require_once(APPPATH.'controllers/'.$RTR->directory.$class.'.php');
+		require_once($file);
 
 		if ( ! class_exists($class, FALSE) OR $method[0] === '_' OR method_exists('CI_Controller', $method))
 		{
